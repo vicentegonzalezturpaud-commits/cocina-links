@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Links y QR — Cocina en Fácil y Sin Culpas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{--verde:#3f7d52;--verde-osc:#2f5e3e;--terra:#d98b5f;--crema:#fbf6ee;
+    --tinta:#2c2a26;--gris:#7a756c;--linea:#e7ddcf;--ok:#3f7d52;--alerta:#b4452f}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--crema);color:var(--tinta);line-height:1.5}
+  .wrap{max-width:680px;margin:0 auto;padding:24px 18px 60px}
+  header{text-align:center;margin-bottom:8px}
+  header h1{font-size:22px;margin:0 0 4px;color:var(--verde-osc)}
+  header p{margin:0;color:var(--gris);font-size:14px}
+  .card{background:#fff;border:1px solid var(--linea);border-radius:16px;padding:20px;margin-top:18px;
+    box-shadow:0 2px 10px rgba(60,50,30,.04)}
+  label{display:block;font-weight:600;font-size:14px;margin-bottom:8px}
+  input[type=text]{width:100%;padding:13px 14px;border:1px solid var(--linea);border-radius:10px;
+    font-size:15px;outline:none;background:#fffdf9}
+  input[type=text]:focus{border-color:var(--verde)}
+  .badge{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:5px 11px;border-radius:999px;
+    font-size:13px;font-weight:600;background:#eef4ee;color:var(--verde-osc)}
+  .badge.gris{background:#f1ede6;color:var(--gris)}
+  .field{margin-top:16px;display:none}.field.show{display:block}
+  .slugprev{font-size:12.5px;color:var(--verde-osc);margin-top:8px;word-break:break-all}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  button{cursor:pointer;border:0;border-radius:10px;font-size:14px;font-weight:600;padding:12px 16px;transition:.15s}
+  .btn{background:var(--verde);color:#fff}.btn:hover{background:var(--verde-osc)}
+  .btn.sec{background:var(--terra)}.btn.sec:hover{filter:brightness(.94)}
+  .btn.ghost{background:#f1ede6;color:var(--tinta)}.btn.ghost:hover{background:#e7ddcf}
+  .result{margin-top:18px;display:none}.result.show{display:block}
+  .qrbox{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px;
+    background:#fffdf9;border:1px dashed var(--linea);border-radius:12px}
+  #qr img,#qr canvas{border-radius:8px}
+  .linkout{display:flex;gap:8px;margin-top:10px}
+  .linkout input{flex:1;font-size:13px;background:#f7f3ec}
+  .hint{font-size:12.5px;color:var(--gris);margin-top:8px}
+  .copied{color:var(--ok);font-weight:600;font-size:13px;display:none;margin-top:6px}.copied.show{display:block}
+  .warn{background:#fdf1ec;border:1px solid #f0c9bb;color:#7a3a2a;border-radius:12px;padding:12px 14px;
+    font-size:13px;margin-top:16px;display:none}.warn.show{display:block}
+  .warn strong{color:var(--alerta)} .warn input{margin-top:8px}
+  details{margin-top:22px;background:#fff;border:1px solid var(--linea);border-radius:14px;padding:4px 18px}
+  summary{cursor:pointer;font-weight:600;padding:14px 0;font-size:15px;color:var(--verde-osc)}
+  details p,details li{font-size:13.5px;color:#4a463f}
+  .foot{text-align:center;margin-top:28px;font-size:12px;color:var(--gris)}
+  .err{color:var(--alerta);font-size:13px;margin-top:8px;display:none}.err.show{display:block}
+  #redir{display:none;text-align:center;padding:70px 22px}
+  #redir .ico{font-size:42px}#redir h2{color:var(--verde-osc);margin:8px 0 6px}
+  #redir p{color:var(--gris);font-size:14px}
+  #redir a.go{display:inline-block;margin-top:14px;background:var(--verde);color:#fff;text-decoration:none;
+    font-weight:700;padding:13px 22px;border-radius:10px}
+</style>
+</head>
+<body>
+
+<!-- ===== Pantalla de redirección ===== -->
+<div id="redir">
+  <div class="ico" id="rico">🚀</div>
+  <h2 id="rtitle">Abriendo la app…</h2>
+  <p>Si no se abre sola en unos segundos, toca el botón.</p>
+  <a class="go" id="rbtn" href="#">Abrir de todas formas</a>
+</div>
+
+<!-- ===== Generador ===== -->
+<div class="wrap" id="gen">
+  <header>
+    <h1>🔗 Generador de Links y QR</h1>
+    <p>Cocina en Fácil y Sin Culpas · reemplaza LinkTwn</p>
+  </header>
+
+  <div class="warn" id="localWarn">
+    <strong>Estás abriendo este archivo desde tu computador.</strong> Los links solo funcionan cuando la
+    página está en internet. Escribe abajo la dirección de tu sitio para probar igual:
+    <input type="text" id="baseUrl" placeholder="https://tusitio.netlify.app/">
+  </div>
+
+  <div class="card">
+    <label for="url">Pega tu link (YouTube, Instagram, TikTok, Spotify…)</label>
+    <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+    <div id="detect" class="badge gris">Esperando un link…</div>
+
+    <!-- nombre / título para personalizar -->
+    <div class="field" id="titleField">
+      <label for="title" style="margin-top:4px">Nombre del link (sale en la dirección)</label>
+      <input type="text" id="title" placeholder="Ej: Kéfir de agua receta fácil" autocomplete="off">
+      <div class="slugprev" id="slugPrev"></div>
+    </div>
+
+    <div id="err" class="err"></div>
+
+    <div class="btn-row">
+      <button class="btn sec" onclick="genDeep()">🚀 Crear link personalizado</button>
+      <button class="btn" onclick="genQR()">📱 Generar QR</button>
+    </div>
+
+    <div class="result" id="deepResult">
+      <label style="margin-top:6px">Link listo para WhatsApp:</label>
+      <div class="linkout">
+        <input type="text" id="deepOut" readonly>
+        <button class="btn ghost" onclick="copyDeep()">Copiar</button>
+      </div>
+      <div class="copied" id="copiedMsg">✓ Copiado</div>
+      <p class="hint" id="deepHint"></p>
+    </div>
+
+    <div class="result" id="qrResult">
+      <div class="qrbox">
+        <div id="qr"></div>
+        <button class="btn ghost" onclick="downloadQR()">⬇️ Descargar QR (PNG)</button>
+      </div>
+      <p class="hint">El QR lleva a tu link personalizado.</p>
+    </div>
+  </div>
+
+  <details>
+    <summary>❓ ¿Cómo actualizo la app en Netlify?</summary>
+    <p>Sube de nuevo la carpeta <strong>app-links</strong> completa (lleva <strong>index.html</strong> y
+    <strong>_redirects</strong>) a tu sitio en Netlify. El archivo <strong>_redirects</strong> es el que permite
+    que los links bonitos tipo <em>/kefir-de-agua/VIDEO</em> funcionen.</p>
+  </details>
+
+  <p class="foot">Cocina en Fácil y Sin Culpas · sin suscripciones</p>
+</div>
+
+<script>
+/* ===================== MODO REDIRECTOR ===================== */
+(function(){
+  var params = new URLSearchParams(location.search);
+  var target = params.get('u');                  // formato viejo / no-YouTube
+  var segs = location.pathname.split('/').filter(Boolean);
+  var last = segs.length ? segs[segs.length-1] : '';
+  var ytId = /^[A-Za-z0-9_-]{11}$/.test(last) ? last : null;   // formato bonito /slug/VIDEOID
+
+  if(!target && !ytId) return;                   // raíz -> generador normal
+
+  document.getElementById('gen').style.display='none';
+  document.getElementById('redir').style.display='block';
+
+  var scheme=null, name='la app', ico='🔗', web=null;
+
+  if(ytId){
+    name='YouTube'; ico='▶️';
+    web = 'https://www.youtube.com/watch?v='+ytId;
+    scheme = 'youtube://www.youtube.com/watch?v='+ytId;
+  } else {
+    if(!/^https?:\/\//i.test(target)) target='https://'+target;
+    web = target;
+    var u; try{ u=new URL(target); }catch(e){ location.replace(target); return; }
+    var host=u.host;
+    if(/youtube\.com|youtu\.be/.test(host)){name='YouTube';ico='▶️';scheme='youtube://'+target.replace(/^https?:\/\//,'');}
+    else if(/instagram\.com/.test(host)){name='Instagram';ico='📸';scheme='instagram://'+u.pathname.replace(/^\//,'').replace(/\/$/,'');}
+    else if(/tiktok\.com/.test(host)){name='TikTok';ico='🎵';scheme='snssdk1233://'+target.replace(/^https?:\/\//,'');}
+    else if(/spotify\.com/.test(host)){name='Spotify';ico='🎧';scheme='spotify:'+u.pathname.split('/').filter(Boolean).join(':');}
+    else if(/facebook\.com|fb\.com|fb\.watch/.test(host)){name='Facebook';ico='👍';scheme='fb://facewebmodal/f?href='+encodeURIComponent(target);}
+    else if(/amazon\./.test(host)){name='Amazon';ico='🛒';scheme='com.amazon.mobile.shopping.web://'+target.replace(/^https?:\/\//,'');}
+    else if(/twitter\.com|x\.com/.test(host)){name='X';ico='𝕏';scheme='twitter://'+target.replace(/^https?:\/\//,'');}
+    else if(/pinterest\./.test(host)){name='Pinterest';ico='📌';scheme='pinterest://'+target.replace(/^https?:\/\//,'');}
+  }
+
+  document.getElementById('rico').textContent=ico;
+  document.getElementById('rtitle').textContent='Abriendo en '+name+'…';
+  document.getElementById('rbtn').setAttribute('href',web);
+
+  if(!scheme){ location.replace(web); return; }
+
+  var fellBack=false, start=Date.now();
+  var timer=setTimeout(function(){
+    if(fellBack) return;
+    if(!document.hidden && (Date.now()-start)<2500){ location.replace(web); }
+  },1500);
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){ fellBack=true; clearTimeout(timer); }
+  });
+  try{ window.location.replace(scheme); }catch(e){ location.replace(web); }
+  window.__REDIR__=true;
+})();
+
+/* ===================== MODO GENERADOR ===================== */
+if(!window.__REDIR__){
+  var lastDeepUrl="", lastPlatform="";
+  const PLATFORMS=[
+    {name:"YouTube",icon:"▶️",test:u=>/youtube\.com|youtu\.be/.test(u.host)},
+    {name:"Instagram",icon:"📸",test:u=>/instagram\.com/.test(u.host)},
+    {name:"TikTok",icon:"🎵",test:u=>/tiktok\.com/.test(u.host)},
+    {name:"Spotify",icon:"🎧",test:u=>/spotify\.com/.test(u.host)},
+    {name:"Facebook",icon:"👍",test:u=>/facebook\.com|fb\.com|fb\.watch/.test(u.host)},
+    {name:"Amazon",icon:"🛒",test:u=>/amazon\./.test(u.host)},
+    {name:"X (Twitter)",icon:"𝕏",test:u=>/twitter\.com|x\.com/.test(u.host)},
+    {name:"Pinterest",icon:"📌",test:u=>/pinterest\./.test(u.host)},
+  ];
+  const $=id=>document.getElementById(id);
+
+  function detectPlatform(raw){
+    let u; try{u=new URL(raw);}catch(e){return null;}
+    if(!/^https?:$/.test(u.protocol)) return null;
+    for(const p of PLATFORMS){ if(p.test(u)) return {...p,url:u}; }
+    return {name:"Link genérico",icon:"🔗",url:u,generic:true};
+  }
+  function youtubeId(u){
+    try{
+      if(/youtu\.be/.test(u.host)) return u.pathname.split('/').filter(Boolean)[0]||null;
+      if(u.searchParams.get('v')) return u.searchParams.get('v');
+      var parts=u.pathname.split('/').filter(Boolean);   // shorts/ID, embed/ID
+      var i=parts.findIndex(p=>p==='shorts'||p==='embed'||p==='v');
+      if(i>=0 && parts[i+1]) return parts[i+1];
+    }catch(e){}
+    return null;
+  }
+  function slugify(s){
+    return (s||'').toString().toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g,'')   // quita acentos
+      .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60).replace(/-+$/,'');
+  }
+  function baseUrlSelf(){
+    const manual = $("baseUrl") ? $("baseUrl").value.trim() : "";
+    if(manual) return manual.replace(/\?.*$/,"").replace(/\/+$/,"")+"/";
+    if(location.protocol==="http:"||location.protocol==="https:"){
+      return location.origin + "/";
+    }
+    return "";
+  }
+  if(location.protocol!=="http:"&&location.protocol!=="https:"){ $("localWarn").classList.add("show"); }
+
+  // intenta traer el título del video de YouTube (con respaldo manual)
+  function fetchTitle(url){
+    fetch('https://www.youtube.com/oembed?format=json&url='+encodeURIComponent(url))
+      .then(r=>r.ok?r.json():Promise.reject())
+      .then(d=>{ if(d&&d.title && !$("title").value){ $("title").value=d.title; updateSlug(); } })
+      .catch(()=>{ /* CORS u offline: queda para escribir a mano */ });
+  }
+  function updateSlug(){
+    const s=slugify($("title").value);
+    $("slugPrev").textContent = s ? ("Dirección: …/"+s+"/CÓDIGO") : "";
+  }
+
+  let current=null;
+  $("url").addEventListener("input",()=>{
+    const v=$("url").value.trim(), d=$("detect"); $("err").classList.remove("show");
+    if(!v){d.className="badge gris";d.textContent="Esperando un link…";$("titleField").classList.remove("show");return;}
+    const p=detectPlatform(v);
+    if(!p){d.className="badge gris";d.textContent="Pega un link que empiece con https://";return;}
+    current=p; d.className="badge"; d.textContent=p.icon+" Detectado: "+p.name;
+    if(p.name==="YouTube"){ $("titleField").classList.add("show"); fetchTitle(p.url.href); }
+    else { $("titleField").classList.remove("show"); }
+  });
+  $("title").addEventListener("input",updateSlug);
+
+  function showErr(m){const e=$("err");e.textContent="⚠️ "+m;e.classList.add("show");}
+  function getValid(){
+    const p=detectPlatform($("url").value.trim());
+    if(!p){showErr("Pega un link válido que empiece con https://");return null;}
+    return p;
+  }
+  function buildLink(p){
+    const base=baseUrlSelf();
+    if(!base) return null;
+    if(p.name==="YouTube"){
+      const id=youtubeId(p.url);
+      if(id){
+        const slug=slugify($("title").value)||"video";
+        return base+slug+"/"+id;
+      }
+    }
+    return base+"?u="+encodeURIComponent(p.url.href);  // resto de plataformas
+  }
+
+  window.genDeep=function(){
+    const p=getValid(); if(!p) return;
+    const link=buildLink(p); lastPlatform=p.name;
+    if(!link){ showErr("Primero sube la página a internet (o escribe la dirección en el aviso de arriba)."); return; }
+    lastDeepUrl=link; $("deepOut").value=link;
+    $("deepHint").innerHTML = p.name==="YouTube"
+      ? "Link limpio con el nombre del video. Al tocarlo en WhatsApp abre directo la app de YouTube."
+      : "Al tocarlo abre directo la app de <strong>"+p.name+"</strong> (si está instalada); si no, el navegador.";
+    $("deepResult").classList.add("show");
+  };
+  window.genQR=function(){
+    const p=getValid(); if(!p) return;
+    const link=buildLink(p)||p.url.href;
+    const box=$("qr"); box.innerHTML="";
+    try{ new QRCode(box,{text:link,width:220,height:220,colorDark:"#2f5e3e",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+      $("qrResult").classList.add("show");
+    }catch(e){ showErr("No se pudo generar el QR. Revisa tu conexión."); }
+  };
+  window.downloadQR=function(){
+    const img=$("qr").querySelector("canvas")||$("qr").querySelector("img");
+    if(!img){showErr("Genera el QR primero.");return;}
+    const data=img.tagName==="CANVAS"?img.toDataURL("image/png"):img.src;
+    const a=document.createElement("a"); a.href=data; a.download="qr-cocinaenfacil.png"; a.click();
+  };
+  window.copyDeep=function(){
+    $("deepOut").select();
+    navigator.clipboard.writeText(lastDeepUrl).then(()=>{
+      const m=$("copiedMsg"); m.classList.add("show"); setTimeout(()=>m.classList.remove("show"),1600);
+    }).catch(()=>{document.execCommand("copy");});
+  };
+}
+</script>
+</body>
+</html>
