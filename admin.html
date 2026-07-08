@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
 <title>Panel · Cocina en Fácil y Sin Culpas</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
 <style>
   :root{--verde:#3f7d52;--verde-osc:#2f5e3e;--terra:#d98b5f;--crema:#fbf6ee;
     --tinta:#2c2a26;--gris:#7a756c;--linea:#e7ddcf;--ok:#3f7d52;--alerta:#b4452f}
@@ -19,10 +19,10 @@
   .card{background:#fff;border:1px solid var(--linea);border-radius:16px;padding:20px;margin-top:18px;
     box-shadow:0 2px 10px rgba(60,50,30,.04)}
   label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
-  label:first-child{margin-top:0}
-  input[type=text],input[type=password],textarea{width:100%;padding:12px 14px;border:1px solid var(--linea);
+  label.first,label:first-child{margin-top:0}
+  input[type=text],input[type=password],textarea,select{width:100%;padding:12px 14px;border:1px solid var(--linea);
     border-radius:10px;font-size:15px;outline:none;background:#fffdf9;font-family:inherit}
-  input:focus,textarea:focus{border-color:var(--verde)}
+  input:focus,textarea:focus,select:focus{border-color:var(--verde)}
   textarea{resize:vertical;min-height:60px}
   .row{display:flex;gap:10px;flex-wrap:wrap}
   .row>div{flex:1;min-width:140px}
@@ -34,6 +34,7 @@
   .btn.sec{background:var(--terra)}.btn.sec:hover{filter:brightness(.94)}
   .btn.ghost{background:#f1ede6;color:var(--tinta)}.btn.ghost:hover{background:#e7ddcf}
   .btn.mini{padding:7px 11px;font-size:12.5px}
+  .btn.dark{background:#2c2a26;color:#fff}.btn.dark:hover{background:#000}
   .slugbox{display:flex;align-items:center;gap:0}
   .slugbox .pfx{background:#f1ede6;border:1px solid var(--linea);border-right:0;border-radius:10px 0 0 10px;
     padding:12px 10px;font-size:13px;color:var(--gris);white-space:nowrap}
@@ -50,8 +51,9 @@
   .preview .pv-d{font-size:12.5px;color:var(--gris)}
   .qrbox{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:14px;padding:16px;
     background:#fffdf9;border:1px dashed var(--linea);border-radius:12px}
-  #qr img,#qr canvas{border-radius:8px}
-  .linkout{display:flex;gap:8px;margin-top:6px}
+  .qrcanvas{width:230px;height:230px}
+  .qrcanvas canvas,.qrcanvas svg{width:230px!important;height:230px!important;border-radius:8px}
+  .linkout{display:flex;gap:8px;margin-top:6px;width:100%}
   .linkout input{flex:1;font-size:13px;background:#f7f3ec}
   .list-item{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--linea)}
   .list-item:first-child{border-top:0}
@@ -62,10 +64,21 @@
   .li-u{font-size:11.5px;color:var(--gris);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .li-actions{display:flex;gap:6px;flex-shrink:0}
   .foot{text-align:center;margin-top:24px;font-size:12px;color:var(--gris)}
-  .center{text-align:center}
   #login .card{max-width:400px;margin:40px auto 0}
   .hidden{display:none!important}
   a.plain{color:var(--verde-osc);font-weight:600}
+  /* Pestañas */
+  .tabs{display:flex;gap:6px;margin-top:16px;background:#f1ede6;padding:5px;border-radius:12px}
+  .tabs button{flex:1;background:transparent;color:var(--gris);padding:10px 8px;font-size:13.5px;border-radius:9px}
+  .tabs button.active{background:#fff;color:var(--verde-osc);box-shadow:0 1px 4px rgba(60,50,30,.08)}
+  .tabpane{display:none}.tabpane.active{display:block}
+  /* Colores QR */
+  .swatches{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .sw{width:34px;height:34px;border-radius:8px;border:2px solid #fff;box-shadow:0 0 0 1px var(--linea);cursor:pointer}
+  .sw.active{box-shadow:0 0 0 2px var(--verde)}
+  .colorpick{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .colorpick input[type=color]{width:44px;height:38px;padding:2px;border-radius:8px;border:1px solid var(--linea);background:#fff;cursor:pointer}
+  .logo-thumb{width:40px;height:40px;object-fit:contain;border:1px solid var(--linea);border-radius:8px;background:#fff}
 </style>
 </head>
 <body>
@@ -83,7 +96,7 @@
       <button class="btn" style="flex:1" onclick="doLogin()">Entrar</button>
     </div>
     <div class="msg err" id="loginMsg"></div>
-    <p class="hint">La contraseña la configuras una vez en Netlify (ADMIN_PASSWORD). Ver el README.</p>
+    <p class="hint">La contraseña la configuraste una vez en Netlify (ADMIN_PASSWORD).</p>
   </div>
 </div>
 
@@ -91,80 +104,154 @@
 <div class="wrap hidden" id="panel">
   <header>
     <h1>🔗 Panel de Links y QR</h1>
-    <p>Crea links cortos con vista previa · <a class="plain" href="/perfil" target="_blank">ver mi perfil</a></p>
+    <p>Cocina en Fácil y Sin Culpas · <a class="plain" href="/perfil" target="_blank">ver mi perfil</a></p>
   </header>
 
-  <!-- Formulario crear / editar -->
-  <div class="card">
-    <label for="target">1. Pega el link de destino (YouTube, Instagram, TikTok…)</label>
-    <input type="text" id="target" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
-    <div class="btn-row">
-      <button class="btn ghost mini" onclick="traerMeta()">✨ Traer título y miniatura de YouTube</button>
-    </div>
+  <div class="tabs">
+    <button id="tabbtn-crear" class="active" onclick="showTab('crear')">➕ Crear link</button>
+    <button id="tabbtn-links" onclick="showTab('links')">📋 Mis links</button>
+    <button id="tabbtn-qr" onclick="showTab('qr')">📱 Estudio QR</button>
+  </div>
 
-    <label for="slug">2. Nombre corto (slug) — así queda tu link</label>
-    <div class="slugbox">
-      <span class="pfx" id="pfx">.../r/</span>
-      <input type="text" id="slug" placeholder="kefir" autocomplete="off">
-    </div>
-    <div class="hint" id="shortPrev"></div>
-
-    <label for="title">3. Título (sale en la vista previa)</label>
-    <input type="text" id="title" placeholder="Kéfir de agua: la receta fácil" autocomplete="off">
-
-    <label for="desc">Descripción corta</label>
-    <textarea id="desc" placeholder="Aprende a preparar kéfir de agua paso a paso."></textarea>
-
-    <label for="image">Imagen de la vista previa (URL)</label>
-    <input type="text" id="image" placeholder="https://i.ytimg.com/vi/VIDEO_ID/hqdefault.jpg" autocomplete="off">
-    <div class="hint">Se llena sola con la miniatura de YouTube. Puedes pegar tu propia imagen.</div>
-
-    <div class="row">
-      <div>
-        <label for="emoji">Emoji (para el botón del perfil)</label>
-        <input type="text" id="emoji" placeholder="▶️" maxlength="4">
+  <!-- ============ TAB: CREAR ============ -->
+  <div class="tabpane active" id="tab-crear">
+    <div class="card">
+      <label class="first" for="target">1. Pega el link de destino (YouTube, Instagram, TikTok…)</label>
+      <input type="text" id="target" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+      <div class="btn-row">
+        <button class="btn ghost mini" onclick="traerMeta()">✨ Traer título y miniatura de YouTube</button>
       </div>
-      <div>
-        <label for="order">Orden en el perfil</label>
-        <input type="text" id="order" placeholder="1" inputmode="numeric">
+
+      <label for="slug">2. Nombre corto (slug) — así queda tu link</label>
+      <div class="slugbox">
+        <span class="pfx" id="pfx">.../r/</span>
+        <input type="text" id="slug" placeholder="kefir" autocomplete="off">
       </div>
-    </div>
+      <div class="hint" id="shortPrev"></div>
 
-    <label class="chk"><input type="checkbox" id="showInProfile"> Mostrar este link como botón en mi página de perfil</label>
+      <label for="title">3. Título (sale en la vista previa)</label>
+      <input type="text" id="title" placeholder="Kéfir de agua: la receta fácil" autocomplete="off">
 
-    <!-- vista previa -->
-    <div class="preview" id="preview" style="display:none">
-      <img id="pvImg" alt="">
-      <div>
-        <div class="pv-t" id="pvT"></div>
-        <div class="pv-d" id="pvD"></div>
+      <label for="desc">Descripción corta</label>
+      <textarea id="desc" placeholder="Aprende a preparar kéfir de agua paso a paso."></textarea>
+
+      <label for="image">Imagen de la vista previa (URL)</label>
+      <input type="text" id="image" placeholder="https://i.ytimg.com/vi/VIDEO_ID/hqdefault.jpg" autocomplete="off">
+      <div class="hint">Se llena sola con la miniatura de YouTube. Puedes pegar tu propia imagen.</div>
+
+      <div class="row">
+        <div>
+          <label for="emoji">Emoji (para el botón del perfil)</label>
+          <input type="text" id="emoji" placeholder="▶️" maxlength="4">
+        </div>
+        <div>
+          <label for="order">Orden en el perfil</label>
+          <input type="text" id="order" placeholder="1" inputmode="numeric">
+        </div>
       </div>
-    </div>
 
-    <div class="btn-row">
-      <button class="btn" onclick="guardar()">💾 Guardar link</button>
-      <button class="btn ghost" onclick="limpiar()">Nuevo (limpiar)</button>
-    </div>
-    <div class="msg" id="formMsg"></div>
+      <label class="chk"><input type="checkbox" id="showInProfile"> Mostrar este link como botón en mi página de perfil</label>
 
-    <!-- QR -->
-    <div class="qrbox" id="qrbox" style="display:none">
-      <div id="qr"></div>
-      <div class="linkout">
-        <input type="text" id="shortOut" readonly>
-        <button class="btn ghost mini" onclick="copiar()">Copiar</button>
+      <div class="preview" id="preview" style="display:none">
+        <img id="pvImg" alt="">
+        <div>
+          <div class="pv-t" id="pvT"></div>
+          <div class="pv-d" id="pvD"></div>
+        </div>
       </div>
-      <button class="btn ghost mini" onclick="descargarQR()">⬇️ Descargar QR (PNG)</button>
+
+      <div class="btn-row">
+        <button class="btn" onclick="guardar()">💾 Guardar link</button>
+        <button class="btn ghost" onclick="limpiar()">Nuevo (limpiar)</button>
+      </div>
+      <div class="msg" id="formMsg"></div>
+
+      <div class="qrbox" id="qrbox" style="display:none">
+        <div class="qrcanvas" id="qrCrear"></div>
+        <div class="linkout">
+          <input type="text" id="shortOut" readonly>
+          <button class="btn ghost mini" onclick="copiar()">Copiar</button>
+        </div>
+        <div class="btn-row" style="margin-top:4px">
+          <button class="btn dark mini" onclick="descargarQRCrear()">⬇️ Descargar QR (negro)</button>
+          <button class="btn sec mini" onclick="abrirEnEstudio()">🎨 Personalizar en Estudio QR</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Lista de links -->
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center">
-      <strong style="color:var(--verde-osc)">Mis links</strong>
-      <button class="btn ghost mini" onclick="cargarLista()">↻ Actualizar</button>
+  <!-- ============ TAB: MIS LINKS ============ -->
+  <div class="tabpane" id="tab-links">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong style="color:var(--verde-osc)">Todos mis links</strong>
+        <button class="btn ghost mini" onclick="cargarLista()">↻ Actualizar</button>
+      </div>
+      <div id="list" style="margin-top:8px"><p class="hint">Cargando…</p></div>
     </div>
-    <div id="list" style="margin-top:8px"><p class="hint">Cargando…</p></div>
+  </div>
+
+  <!-- ============ TAB: ESTUDIO QR ============ -->
+  <div class="tabpane" id="tab-qr">
+    <div class="card">
+      <strong style="color:var(--verde-osc)">🎨 Estudio de códigos QR</strong>
+      <p class="hint" style="margin-top:4px">Crea un QR de cualquier link y descárgalo con el color, logo y estilo que quieras.</p>
+
+      <label>Elige uno de tus links</label>
+      <select id="qrPick" onchange="qrPickChange()"><option value="">— o pega un link abajo —</option></select>
+
+      <label for="qrData">Link para el QR</label>
+      <input type="text" id="qrData" placeholder="https://linkpaulalarenas.netlify.app/r/kefir" oninput="renderStudio()">
+
+      <label>Color del QR</label>
+      <div class="swatches" id="swatches">
+        <div class="sw active" style="background:#111111" data-color="#111111" title="Negro"></div>
+        <div class="sw" style="background:#2f5e3e" data-color="#2f5e3e" title="Verde marca"></div>
+        <div class="sw" style="background:#d98b5f" data-color="#d98b5f" title="Terracota"></div>
+        <div class="sw" style="background:#2a4d8f" data-color="#2a4d8f" title="Azul"></div>
+        <div class="sw" style="background:#8f2a5c" data-color="#8f2a5c" title="Frambuesa"></div>
+      </div>
+      <div class="colorpick">
+        <input type="color" id="qrColor" value="#111111" oninput="pickCustomColor(this.value)">
+        <span class="hint" style="margin:0">…o elige un color personalizado</span>
+      </div>
+
+      <div class="row" style="margin-top:6px">
+        <div>
+          <label for="qrDots">Estilo de puntos</label>
+          <select id="qrDots" onchange="renderStudio()">
+            <option value="square">Cuadrado</option>
+            <option value="rounded">Redondeado</option>
+            <option value="dots">Puntos</option>
+            <option value="classy">Elegante</option>
+          </select>
+        </div>
+        <div>
+          <label for="qrBg">Fondo</label>
+          <select id="qrBg" onchange="renderStudio()">
+            <option value="#ffffff">Blanco</option>
+            <option value="transparent">Transparente</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Logo en el centro (opcional)</label>
+      <div class="btn-row" style="margin-top:0">
+        <input type="file" id="qrLogo" accept="image/*" style="display:none" onchange="cargarLogo(this)">
+        <button class="btn ghost mini" onclick="document.getElementById('qrLogo').click()">🖼️ Subir logo</button>
+        <img id="logoThumb" class="logo-thumb" style="display:none" alt="">
+        <button class="btn ghost mini" id="logoQuitar" style="display:none" onclick="quitarLogo()">Quitar logo</button>
+      </div>
+
+      <div class="qrbox">
+        <div class="qrcanvas" id="qrStudio"></div>
+        <div class="btn-row" style="margin-top:2px">
+          <button class="btn dark mini" onclick="descargarStudio('png')">⬇️ PNG (alta resolución)</button>
+          <button class="btn ghost mini" onclick="descargarStudio('svg')">⬇️ SVG (para imprimir)</button>
+        </div>
+        <p class="hint" id="qrStudioHint">Elige un link arriba para ver el QR.</p>
+      </div>
+    </div>
   </div>
 
   <p class="foot">Cocina en Fácil y Sin Culpas · sin suscripciones</p>
@@ -175,7 +262,8 @@ const $ = id => document.getElementById(id);
 const API = "/.netlify/functions/links";
 let PASS = "";
 let ORIGIN = location.origin;
-let editingSlug = null; // si estás editando, el slug original
+let editingSlug = null;
+let lastLinks = [];
 
 function slugify(s){
   return (s||"").toString().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
@@ -191,13 +279,23 @@ async function api(payload){
   return d;
 }
 
+// ---------- PESTAÑAS ----------
+function showTab(name){
+  ["crear","links","qr"].forEach(t=>{
+    $("tab-"+t).classList.toggle("active", t===name);
+    $("tabbtn-"+t).classList.toggle("active", t===name);
+  });
+  if(name==="links") cargarLista();
+  if(name==="qr") llenarQrPick();
+}
+
 // ---------- LOGIN ----------
 async function doLogin(){
   const p = $("pass").value.trim();
   if(!p){ return; }
   $("loginMsg").classList.remove("show");
   try{
-    await api({action:"list", password:p});   // si la contraseña sirve, lista OK
+    await api({action:"list", password:p});
     PASS = p;
     sessionStorage.setItem("pw", p);
     $("login").classList.add("hidden");
@@ -209,14 +307,9 @@ async function doLogin(){
   }
 }
 $("pass").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+(function(){ const s = sessionStorage.getItem("pw"); if(s){ $("pass").value=s; doLogin(); } })();
 
-// auto-login si ya entró antes en esta sesión
-(function(){
-  const saved = sessionStorage.getItem("pw");
-  if(saved){ $("pass").value = saved; doLogin(); }
-})();
-
-// ---------- FORM ----------
+// ---------- FORM CREAR ----------
 $("slug").addEventListener("input", ()=>{ $("slug").value = slugify($("slug").value); actualizarPrev(); });
 $("title").addEventListener("input", actualizarPrev);
 $("desc").addEventListener("input", actualizarPrev);
@@ -225,92 +318,86 @@ $("image").addEventListener("input", actualizarPrev);
 function actualizarPrev(){
   const slug = slugify($("slug").value);
   $("shortPrev").textContent = slug ? ("Tu link corto: " + shortUrl(slug)) : "";
-  const t = $("title").value.trim(), d = $("desc").value.trim(), img = $("image").value.trim();
+  const t=$("title").value.trim(), d=$("desc").value.trim(), img=$("image").value.trim();
   if(t || img){
-    $("preview").style.display = "flex";
-    $("pvImg").src = img || "";
-    $("pvImg").style.display = img ? "block" : "none";
-    $("pvT").textContent = t || "(sin título)";
-    $("pvD").textContent = d || "";
-  } else { $("preview").style.display = "none"; }
+    $("preview").style.display="flex";
+    $("pvImg").src=img||""; $("pvImg").style.display=img?"block":"none";
+    $("pvT").textContent=t||"(sin título)"; $("pvD").textContent=d||"";
+  } else { $("preview").style.display="none"; }
 }
 
 async function traerMeta(){
-  const target = $("target").value.trim();
+  const target=$("target").value.trim();
   if(!target){ msg("form","Pega primero el link de destino.","err"); return; }
   msg("form","Buscando en YouTube…","ok");
   try{
-    const d = await api({action:"meta", password:PASS, target});
-    if(d.title && !$("title").value) $("title").value = d.title;
-    if(d.image) $("image").value = d.image;
-    if(d.isYouTube && !$("emoji").value) $("emoji").value = "▶️";
-    if(!$("slug").value && d.title) $("slug").value = slugify(d.title).split("-").slice(0,3).join("-");
+    const d=await api({action:"meta", password:PASS, target});
+    if(d.title && !$("title").value) $("title").value=d.title;
+    if(d.image) $("image").value=d.image;
+    if(d.isYouTube && !$("emoji").value) $("emoji").value="▶️";
+    if(!$("slug").value && d.title) $("slug").value=slugify(d.title).split("-").slice(0,3).join("-");
     actualizarPrev();
     msg("form", d.isYouTube ? "✓ Título y miniatura listos." : "No parece YouTube; escribe título e imagen a mano.", "ok");
   }catch(e){ msg("form","⚠️ "+e.message,"err"); }
 }
 
 async function guardar(){
-  const target = $("target").value.trim();
-  const slug = slugify($("slug").value);
+  const target=$("target").value.trim(), slug=slugify($("slug").value);
   if(!target){ msg("form","Falta el link de destino.","err"); return; }
   if(!slug){ msg("form","Falta el nombre corto (slug).","err"); return; }
-  const payload = {
-    action:"save", password:PASS, target, slug,
+  const payload={ action:"save", password:PASS, target, slug,
     title:$("title").value.trim(), description:$("desc").value.trim(),
     image:$("image").value.trim(), emoji:$("emoji").value.trim(),
     order:$("order").value.trim(), showInProfile:$("showInProfile").checked,
-    originalSlug: editingSlug, overwrite: editingSlug ? true : false
-  };
+    originalSlug: editingSlug, overwrite: editingSlug ? true : false };
   try{
-    const d = await api(payload);
+    const d=await api(payload);
     msg("form","✓ Guardado. Tu link corto es "+shortUrl(d.link.slug),"ok");
-    editingSlug = d.link.slug;
-    mostrarQR(d.link.slug);
+    editingSlug=d.link.slug;
+    mostrarQRCrear(d.link.slug);
     cargarLista();
   }catch(e){ msg("form","⚠️ "+e.message,"err"); }
 }
 
 function limpiar(){
-  editingSlug = null;
+  editingSlug=null;
   ["target","slug","title","desc","image","emoji","order"].forEach(id=>$(id).value="");
-  $("showInProfile").checked = false;
+  $("showInProfile").checked=false;
   $("preview").style.display="none"; $("qrbox").style.display="none";
   $("formMsg").classList.remove("show"); actualizarPrev();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
-// ---------- QR ----------
-function mostrarQR(slug){
-  const url = shortUrl(slug);
-  $("shortOut").value = url;
-  const box = $("qr"); box.innerHTML="";
-  new QRCode(box,{text:url,width:220,height:220,colorDark:"#2f5e3e",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+// ---------- QR en pestaña CREAR (negro por defecto) ----------
+let qrCrearObj=null, lastShort="";
+function mostrarQRCrear(slug){
+  const url=shortUrl(slug); lastShort=url; $("shortOut").value=url;
+  const box=$("qrCrear"); box.innerHTML="";
+  qrCrearObj=new QRCodeStyling({
+    width:1000, height:1000, data:url, margin:8,
+    dotsOptions:{color:"#111111", type:"square"},
+    backgroundOptions:{color:"#ffffff"},
+    qrOptions:{errorCorrectionLevel:"M"}
+  });
+  qrCrearObj.append(box);
   $("qrbox").style.display="flex";
 }
-function descargarQR(){
-  const img = $("qr").querySelector("canvas")||$("qr").querySelector("img");
-  if(!img) return;
-  const data = img.tagName==="CANVAS"?img.toDataURL("image/png"):img.src;
-  const a=document.createElement("a"); a.href=data; a.download="qr-"+($("slug").value||"link")+".png"; a.click();
-}
-function copiar(){
-  $("shortOut").select();
-  navigator.clipboard.writeText($("shortOut").value).catch(()=>document.execCommand("copy"));
-}
+function descargarQRCrear(){ if(qrCrearObj) qrCrearObj.download({name:"qr-"+($("slug").value||"link"), extension:"png"}); }
+function copiar(){ $("shortOut").select(); navigator.clipboard.writeText(lastShort).catch(()=>document.execCommand("copy")); }
+function abrirEnEstudio(){ showTab("qr"); $("qrData").value=lastShort; $("qrPick").value=""; renderStudio(); window.scrollTo({top:0,behavior:"smooth"}); }
 
 // ---------- LISTA ----------
 async function cargarLista(){
   try{
-    const d = await api({action:"list", password:PASS});
-    const list = $("list");
-    if(!d.links.length){ list.innerHTML='<p class="hint">Aún no tienes links. Crea el primero arriba.</p>'; return; }
-    list.innerHTML = "";
-    d.links.forEach(l=>{
-      const div = document.createElement("div");
-      div.className="list-item";
-      div.innerHTML =
-        (l.image ? '<img src="'+escAttr(l.image)+'" alt="">' : '<img alt="" style="background:#f1ede6">')+
+    const d=await api({action:"list", password:PASS});
+    lastLinks=d.links||[];
+    const list=$("list");
+    if(!lastLinks.length){ list.innerHTML='<p class="hint">Aún no tienes links. Crea el primero en la pestaña "Crear link".</p>'; return; }
+    list.innerHTML="";
+    lastLinks.forEach(l=>{
+      const div=document.createElement("div"); div.className="list-item";
+      div.innerHTML=
+        (l.image?'<img src="'+escAttr(l.image)+'" alt="">':'<img alt="" style="background:#f1ede6">')+
         '<div class="li-main">'+
           '<div class="li-t">'+escHtml(l.title||l.slug)+(l.showInProfile?' ⭐':'')+'</div>'+
           '<div class="li-s">/r/'+escHtml(l.slug)+'</div>'+
@@ -323,20 +410,21 @@ async function cargarLista(){
         '</div>';
       list.appendChild(div);
     });
-    list.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editar(d.links, b.getAttribute("data-edit")));
-    list.querySelectorAll("[data-qr]").forEach(b=>b.onclick=()=>{ mostrarQR(b.getAttribute("data-qr")); window.scrollTo({top:0,behavior:"smooth"}); });
+    list.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editar(b.getAttribute("data-edit")));
+    list.querySelectorAll("[data-qr]").forEach(b=>b.onclick=()=>{ showTab("qr"); $("qrData").value=shortUrl(b.getAttribute("data-qr")); $("qrPick").value=b.getAttribute("data-qr"); renderStudio(); window.scrollTo({top:0,behavior:"smooth"}); });
     list.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>borrar(b.getAttribute("data-del")));
   }catch(e){ $("list").innerHTML='<p class="msg err show">⚠️ '+escHtml(e.message)+'</p>'; }
 }
 
-function editar(links, slug){
-  const l = links.find(x=>x.slug===slug); if(!l) return;
-  editingSlug = l.slug;
+function editar(slug){
+  const l=lastLinks.find(x=>x.slug===slug); if(!l) return;
+  showTab("crear");
+  editingSlug=l.slug;
   $("target").value=l.target||""; $("slug").value=l.slug||"";
   $("title").value=l.title||""; $("desc").value=l.description||"";
   $("image").value=l.image||""; $("emoji").value=l.emoji||"";
   $("order").value=l.order||""; $("showInProfile").checked=!!l.showInProfile;
-  actualizarPrev(); mostrarQR(l.slug);
+  actualizarPrev(); mostrarQRCrear(l.slug);
   msg("form","Editando "+l.slug+". Cambia lo que quieras y guarda.","ok");
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -347,10 +435,71 @@ async function borrar(slug){
   catch(e){ alert("Error: "+e.message); }
 }
 
-// ---------- helpers ----------
-function msg(which, text, kind){
-  const m = $(which+"Msg"); m.textContent=text; m.className="msg "+kind+" show";
+// ---------- ESTUDIO QR ----------
+let qrStudioObj=null, studioColor="#111111", studioLogo=null;
+
+function llenarQrPick(){
+  const sel=$("qrPick");
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— o pega un link abajo —</option>';
+  lastLinks.forEach(l=>{
+    const o=document.createElement("option"); o.value=l.slug; o.textContent=(l.title||l.slug)+"  (/r/"+l.slug+")";
+    sel.appendChild(o);
+  });
+  sel.value=cur;
 }
+function qrPickChange(){
+  const slug=$("qrPick").value;
+  if(slug){ $("qrData").value=shortUrl(slug); renderStudio(); }
+}
+document.querySelectorAll("#swatches .sw").forEach(sw=>{
+  sw.onclick=()=>{
+    document.querySelectorAll("#swatches .sw").forEach(x=>x.classList.remove("active"));
+    sw.classList.add("active");
+    studioColor=sw.getAttribute("data-color");
+    $("qrColor").value=studioColor;
+    renderStudio();
+  };
+});
+function pickCustomColor(v){
+  studioColor=v;
+  document.querySelectorAll("#swatches .sw").forEach(x=>x.classList.remove("active"));
+  renderStudio();
+}
+function cargarLogo(input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=e=>{ studioLogo=e.target.result; $("logoThumb").src=studioLogo; $("logoThumb").style.display="inline-block"; $("logoQuitar").style.display="inline-block"; renderStudio(); };
+  reader.readAsDataURL(f);
+}
+function quitarLogo(){ studioLogo=null; $("qrLogo").value=""; $("logoThumb").style.display="none"; $("logoQuitar").style.display="none"; renderStudio(); }
+
+function renderStudio(){
+  const data=$("qrData").value.trim();
+  const box=$("qrStudio");
+  if(!data){ box.innerHTML=""; $("qrStudioHint").textContent="Elige un link arriba para ver el QR."; return; }
+  $("qrStudioHint").textContent="Vista previa. Descárgalo en PNG o SVG.";
+  box.innerHTML="";
+  const opts={
+    width:1000, height:1000, data, margin:8,
+    dotsOptions:{ color:studioColor, type:$("qrDots").value },
+    cornersSquareOptions:{ color:studioColor },
+    cornersDotOptions:{ color:studioColor },
+    backgroundOptions:{ color:$("qrBg").value },
+    qrOptions:{ errorCorrectionLevel: studioLogo ? "H" : "M" }
+  };
+  if(studioLogo){ opts.image=studioLogo; opts.imageOptions={ crossOrigin:"anonymous", margin:6, imageSize:0.35 }; }
+  qrStudioObj=new QRCodeStyling(opts);
+  qrStudioObj.append(box);
+}
+function descargarStudio(ext){
+  if(!qrStudioObj){ alert("Primero elige un link."); return; }
+  const slug=($("qrPick").value)||"cocinaenfacil";
+  qrStudioObj.download({ name:"qr-"+slug, extension:ext });
+}
+
+// ---------- helpers ----------
+function msg(which,text,kind){ const m=$(which+"Msg"); m.textContent=text; m.className="msg "+kind+" show"; }
 function escHtml(s){return String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
 function escAttr(s){return String(s==null?"":s).replace(/["&<>]/g,c=>({'"':"&quot;","&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
 </script>

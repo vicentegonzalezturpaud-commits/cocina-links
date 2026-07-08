@@ -71,6 +71,27 @@ elige un emoji y un número de orden. Se agrega solo a **/perfil**.
 
 ---
 
+## 🟢 El panel tiene 3 secciones (pestañas)
+
+Arriba del panel hay 3 pestañas:
+
+1. **➕ Crear link** — para crear o editar un link (lo del Paso 3).
+2. **📋 Mis links** — todos tus links en un solo lugar. Cada uno tiene botones:
+   **Editar**, **QR** (lo abre en el Estudio) y **🗑** (borrar).
+3. **📱 Estudio QR** — para hacer y descargar códigos QR bonitos.
+
+### 📱 Estudio QR (colores, logo y descarga)
+1. En "Elige uno de tus links" selecciona el link (o pega cualquiera en el campo de abajo).
+2. Elige el **color**: viene en **negro** por defecto; también hay verde, terracota, azul,
+   frambuesa, o toca el cuadrito de color para elegir **el que quieras**.
+3. Elige el **estilo de puntos** (cuadrado, redondeado, puntos, elegante) y el **fondo**
+   (blanco o transparente).
+4. (Opcional) **Sube un logo** para que salga en el centro del QR (ej. tu logo).
+5. Descarga en **PNG** (para pantallas/WhatsApp) o **SVG** (para imprimir grande sin que se
+   pixele, ideal para carteles o flyers).
+
+---
+
 ## 🟢 PASO 4: comprobar la vista previa (antes de compartir)
 
 1. Copia tu link corto (ej. `https://linkpaulalarenas.netlify.app/r/kefir`).
