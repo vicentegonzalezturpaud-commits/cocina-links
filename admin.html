@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Panel · Cocina en Fácil y Sin Culpas</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{--verde:#3f7d52;--verde-osc:#2f5e3e;--terra:#d98b5f;--crema:#fbf6ee;
+    --tinta:#2c2a26;--gris:#7a756c;--linea:#e7ddcf;--ok:#3f7d52;--alerta:#b4452f}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--crema);color:var(--tinta);line-height:1.5}
+  .wrap{max-width:720px;margin:0 auto;padding:24px 18px 64px}
+  header{text-align:center;margin-bottom:6px}
+  header h1{font-size:22px;margin:0 0 4px;color:var(--verde-osc)}
+  header p{margin:0;color:var(--gris);font-size:14px}
+  .card{background:#fff;border:1px solid var(--linea);border-radius:16px;padding:20px;margin-top:18px;
+    box-shadow:0 2px 10px rgba(60,50,30,.04)}
+  label{display:block;font-weight:600;font-size:14px;margin:14px 0 6px}
+  label:first-child{margin-top:0}
+  input[type=text],input[type=password],textarea{width:100%;padding:12px 14px;border:1px solid var(--linea);
+    border-radius:10px;font-size:15px;outline:none;background:#fffdf9;font-family:inherit}
+  input:focus,textarea:focus{border-color:var(--verde)}
+  textarea{resize:vertical;min-height:60px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:140px}
+  .chk{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:14px;font-weight:600}
+  .chk input{width:auto}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  button{cursor:pointer;border:0;border-radius:10px;font-size:14px;font-weight:600;padding:12px 16px;transition:.15s}
+  .btn{background:var(--verde);color:#fff}.btn:hover{background:var(--verde-osc)}
+  .btn.sec{background:var(--terra)}.btn.sec:hover{filter:brightness(.94)}
+  .btn.ghost{background:#f1ede6;color:var(--tinta)}.btn.ghost:hover{background:#e7ddcf}
+  .btn.mini{padding:7px 11px;font-size:12.5px}
+  .slugbox{display:flex;align-items:center;gap:0}
+  .slugbox .pfx{background:#f1ede6;border:1px solid var(--linea);border-right:0;border-radius:10px 0 0 10px;
+    padding:12px 10px;font-size:13px;color:var(--gris);white-space:nowrap}
+  .slugbox input{border-radius:0 10px 10px 0}
+  .hint{font-size:12.5px;color:var(--gris);margin-top:6px}
+  .msg{margin-top:14px;padding:11px 14px;border-radius:10px;font-size:13.5px;display:none}
+  .msg.show{display:block}
+  .msg.ok{background:#eef4ee;color:var(--verde-osc)}
+  .msg.err{background:#fdf1ec;color:#7a3a2a;border:1px solid #f0c9bb}
+  .preview{display:flex;gap:12px;align-items:center;margin-top:14px;padding:12px;background:#fffdf9;
+    border:1px dashed var(--linea);border-radius:12px}
+  .preview img{width:120px;height:68px;object-fit:cover;border-radius:8px;background:#eee;flex-shrink:0}
+  .preview .pv-t{font-weight:700;font-size:14px}
+  .preview .pv-d{font-size:12.5px;color:var(--gris)}
+  .qrbox{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:14px;padding:16px;
+    background:#fffdf9;border:1px dashed var(--linea);border-radius:12px}
+  #qr img,#qr canvas{border-radius:8px}
+  .linkout{display:flex;gap:8px;margin-top:6px}
+  .linkout input{flex:1;font-size:13px;background:#f7f3ec}
+  .list-item{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--linea)}
+  .list-item:first-child{border-top:0}
+  .list-item img{width:70px;height:40px;object-fit:cover;border-radius:6px;background:#eee;flex-shrink:0}
+  .li-main{flex:1;min-width:0}
+  .li-t{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .li-s{font-size:12.5px;color:var(--verde-osc)}
+  .li-u{font-size:11.5px;color:var(--gris);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .li-actions{display:flex;gap:6px;flex-shrink:0}
+  .foot{text-align:center;margin-top:24px;font-size:12px;color:var(--gris)}
+  .center{text-align:center}
+  #login .card{max-width:400px;margin:40px auto 0}
+  .hidden{display:none!important}
+  a.plain{color:var(--verde-osc);font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div class="wrap" id="login">
+  <header>
+    <h1>🔒 Panel de Links</h1>
+    <p>Cocina en Fácil y Sin Culpas</p>
+  </header>
+  <div class="card">
+    <label for="pass">Contraseña</label>
+    <input type="password" id="pass" placeholder="Tu contraseña" autocomplete="current-password">
+    <div class="btn-row">
+      <button class="btn" style="flex:1" onclick="doLogin()">Entrar</button>
+    </div>
+    <div class="msg err" id="loginMsg"></div>
+    <p class="hint">La contraseña la configuras una vez en Netlify (ADMIN_PASSWORD). Ver el README.</p>
+  </div>
+</div>
+
+<!-- ===================== PANEL ===================== -->
+<div class="wrap hidden" id="panel">
+  <header>
+    <h1>🔗 Panel de Links y QR</h1>
+    <p>Crea links cortos con vista previa · <a class="plain" href="/perfil" target="_blank">ver mi perfil</a></p>
+  </header>
+
+  <!-- Formulario crear / editar -->
+  <div class="card">
+    <label for="target">1. Pega el link de destino (YouTube, Instagram, TikTok…)</label>
+    <input type="text" id="target" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
+    <div class="btn-row">
+      <button class="btn ghost mini" onclick="traerMeta()">✨ Traer título y miniatura de YouTube</button>
+    </div>
+
+    <label for="slug">2. Nombre corto (slug) — así queda tu link</label>
+    <div class="slugbox">
+      <span class="pfx" id="pfx">.../r/</span>
+      <input type="text" id="slug" placeholder="kefir" autocomplete="off">
+    </div>
+    <div class="hint" id="shortPrev"></div>
+
+    <label for="title">3. Título (sale en la vista previa)</label>
+    <input type="text" id="title" placeholder="Kéfir de agua: la receta fácil" autocomplete="off">
+
+    <label for="desc">Descripción corta</label>
+    <textarea id="desc" placeholder="Aprende a preparar kéfir de agua paso a paso."></textarea>
+
+    <label for="image">Imagen de la vista previa (URL)</label>
+    <input type="text" id="image" placeholder="https://i.ytimg.com/vi/VIDEO_ID/hqdefault.jpg" autocomplete="off">
+    <div class="hint">Se llena sola con la miniatura de YouTube. Puedes pegar tu propia imagen.</div>
+
+    <div class="row">
+      <div>
+        <label for="emoji">Emoji (para el botón del perfil)</label>
+        <input type="text" id="emoji" placeholder="▶️" maxlength="4">
+      </div>
+      <div>
+        <label for="order">Orden en el perfil</label>
+        <input type="text" id="order" placeholder="1" inputmode="numeric">
+      </div>
+    </div>
+
+    <label class="chk"><input type="checkbox" id="showInProfile"> Mostrar este link como botón en mi página de perfil</label>
+
+    <!-- vista previa -->
+    <div class="preview" id="preview" style="display:none">
+      <img id="pvImg" alt="">
+      <div>
+        <div class="pv-t" id="pvT"></div>
+        <div class="pv-d" id="pvD"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="guardar()">💾 Guardar link</button>
+      <button class="btn ghost" onclick="limpiar()">Nuevo (limpiar)</button>
+    </div>
+    <div class="msg" id="formMsg"></div>
+
+    <!-- QR -->
+    <div class="qrbox" id="qrbox" style="display:none">
+      <div id="qr"></div>
+      <div class="linkout">
+        <input type="text" id="shortOut" readonly>
+        <button class="btn ghost mini" onclick="copiar()">Copiar</button>
+      </div>
+      <button class="btn ghost mini" onclick="descargarQR()">⬇️ Descargar QR (PNG)</button>
+    </div>
+  </div>
+
+  <!-- Lista de links -->
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <strong style="color:var(--verde-osc)">Mis links</strong>
+      <button class="btn ghost mini" onclick="cargarLista()">↻ Actualizar</button>
+    </div>
+    <div id="list" style="margin-top:8px"><p class="hint">Cargando…</p></div>
+  </div>
+
+  <p class="foot">Cocina en Fácil y Sin Culpas · sin suscripciones</p>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const API = "/.netlify/functions/links";
+let PASS = "";
+let ORIGIN = location.origin;
+let editingSlug = null; // si estás editando, el slug original
+
+function slugify(s){
+  return (s||"").toString().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,60).replace(/-+$/,"");
+}
+function shortUrl(slug){ return ORIGIN + "/r/" + slug; }
+
+async function api(payload){
+  const r = await fetch(API,{method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify(payload)});
+  let d={}; try{ d = await r.json(); }catch(e){}
+  if(!r.ok) throw new Error(d.error || ("Error "+r.status));
+  return d;
+}
+
+// ---------- LOGIN ----------
+async function doLogin(){
+  const p = $("pass").value.trim();
+  if(!p){ return; }
+  $("loginMsg").classList.remove("show");
+  try{
+    await api({action:"list", password:p});   // si la contraseña sirve, lista OK
+    PASS = p;
+    sessionStorage.setItem("pw", p);
+    $("login").classList.add("hidden");
+    $("panel").classList.remove("hidden");
+    $("pfx").textContent = ORIGIN.replace(/^https?:\/\//,"") + "/r/";
+    cargarLista();
+  }catch(e){
+    const m=$("loginMsg"); m.textContent = "⚠️ " + e.message; m.classList.add("show");
+  }
+}
+$("pass").addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+
+// auto-login si ya entró antes en esta sesión
+(function(){
+  const saved = sessionStorage.getItem("pw");
+  if(saved){ $("pass").value = saved; doLogin(); }
+})();
+
+// ---------- FORM ----------
+$("slug").addEventListener("input", ()=>{ $("slug").value = slugify($("slug").value); actualizarPrev(); });
+$("title").addEventListener("input", actualizarPrev);
+$("desc").addEventListener("input", actualizarPrev);
+$("image").addEventListener("input", actualizarPrev);
+
+function actualizarPrev(){
+  const slug = slugify($("slug").value);
+  $("shortPrev").textContent = slug ? ("Tu link corto: " + shortUrl(slug)) : "";
+  const t = $("title").value.trim(), d = $("desc").value.trim(), img = $("image").value.trim();
+  if(t || img){
+    $("preview").style.display = "flex";
+    $("pvImg").src = img || "";
+    $("pvImg").style.display = img ? "block" : "none";
+    $("pvT").textContent = t || "(sin título)";
+    $("pvD").textContent = d || "";
+  } else { $("preview").style.display = "none"; }
+}
+
+async function traerMeta(){
+  const target = $("target").value.trim();
+  if(!target){ msg("form","Pega primero el link de destino.","err"); return; }
+  msg("form","Buscando en YouTube…","ok");
+  try{
+    const d = await api({action:"meta", password:PASS, target});
+    if(d.title && !$("title").value) $("title").value = d.title;
+    if(d.image) $("image").value = d.image;
+    if(d.isYouTube && !$("emoji").value) $("emoji").value = "▶️";
+    if(!$("slug").value && d.title) $("slug").value = slugify(d.title).split("-").slice(0,3).join("-");
+    actualizarPrev();
+    msg("form", d.isYouTube ? "✓ Título y miniatura listos." : "No parece YouTube; escribe título e imagen a mano.", "ok");
+  }catch(e){ msg("form","⚠️ "+e.message,"err"); }
+}
+
+async function guardar(){
+  const target = $("target").value.trim();
+  const slug = slugify($("slug").value);
+  if(!target){ msg("form","Falta el link de destino.","err"); return; }
+  if(!slug){ msg("form","Falta el nombre corto (slug).","err"); return; }
+  const payload = {
+    action:"save", password:PASS, target, slug,
+    title:$("title").value.trim(), description:$("desc").value.trim(),
+    image:$("image").value.trim(), emoji:$("emoji").value.trim(),
+    order:$("order").value.trim(), showInProfile:$("showInProfile").checked,
+    originalSlug: editingSlug, overwrite: editingSlug ? true : false
+  };
+  try{
+    const d = await api(payload);
+    msg("form","✓ Guardado. Tu link corto es "+shortUrl(d.link.slug),"ok");
+    editingSlug = d.link.slug;
+    mostrarQR(d.link.slug);
+    cargarLista();
+  }catch(e){ msg("form","⚠️ "+e.message,"err"); }
+}
+
+function limpiar(){
+  editingSlug = null;
+  ["target","slug","title","desc","image","emoji","order"].forEach(id=>$(id).value="");
+  $("showInProfile").checked = false;
+  $("preview").style.display="none"; $("qrbox").style.display="none";
+  $("formMsg").classList.remove("show"); actualizarPrev();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+// ---------- QR ----------
+function mostrarQR(slug){
+  const url = shortUrl(slug);
+  $("shortOut").value = url;
+  const box = $("qr"); box.innerHTML="";
+  new QRCode(box,{text:url,width:220,height:220,colorDark:"#2f5e3e",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});
+  $("qrbox").style.display="flex";
+}
+function descargarQR(){
+  const img = $("qr").querySelector("canvas")||$("qr").querySelector("img");
+  if(!img) return;
+  const data = img.tagName==="CANVAS"?img.toDataURL("image/png"):img.src;
+  const a=document.createElement("a"); a.href=data; a.download="qr-"+($("slug").value||"link")+".png"; a.click();
+}
+function copiar(){
+  $("shortOut").select();
+  navigator.clipboard.writeText($("shortOut").value).catch(()=>document.execCommand("copy"));
+}
+
+// ---------- LISTA ----------
+async function cargarLista(){
+  try{
+    const d = await api({action:"list", password:PASS});
+    const list = $("list");
+    if(!d.links.length){ list.innerHTML='<p class="hint">Aún no tienes links. Crea el primero arriba.</p>'; return; }
+    list.innerHTML = "";
+    d.links.forEach(l=>{
+      const div = document.createElement("div");
+      div.className="list-item";
+      div.innerHTML =
+        (l.image ? '<img src="'+escAttr(l.image)+'" alt="">' : '<img alt="" style="background:#f1ede6">')+
+        '<div class="li-main">'+
+          '<div class="li-t">'+escHtml(l.title||l.slug)+(l.showInProfile?' ⭐':'')+'</div>'+
+          '<div class="li-s">/r/'+escHtml(l.slug)+'</div>'+
+          '<div class="li-u">'+escHtml(l.target)+'</div>'+
+        '</div>'+
+        '<div class="li-actions">'+
+          '<button class="btn ghost mini" data-edit="'+escAttr(l.slug)+'">Editar</button>'+
+          '<button class="btn sec mini" data-qr="'+escAttr(l.slug)+'">QR</button>'+
+          '<button class="btn ghost mini" data-del="'+escAttr(l.slug)+'">🗑</button>'+
+        '</div>';
+      list.appendChild(div);
+    });
+    list.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editar(d.links, b.getAttribute("data-edit")));
+    list.querySelectorAll("[data-qr]").forEach(b=>b.onclick=()=>{ mostrarQR(b.getAttribute("data-qr")); window.scrollTo({top:0,behavior:"smooth"}); });
+    list.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>borrar(b.getAttribute("data-del")));
+  }catch(e){ $("list").innerHTML='<p class="msg err show">⚠️ '+escHtml(e.message)+'</p>'; }
+}
+
+function editar(links, slug){
+  const l = links.find(x=>x.slug===slug); if(!l) return;
+  editingSlug = l.slug;
+  $("target").value=l.target||""; $("slug").value=l.slug||"";
+  $("title").value=l.title||""; $("desc").value=l.description||"";
+  $("image").value=l.image||""; $("emoji").value=l.emoji||"";
+  $("order").value=l.order||""; $("showInProfile").checked=!!l.showInProfile;
+  actualizarPrev(); mostrarQR(l.slug);
+  msg("form","Editando "+l.slug+". Cambia lo que quieras y guarda.","ok");
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+async function borrar(slug){
+  if(!confirm("¿Borrar el link /r/"+slug+" ? Esto no se puede deshacer.")) return;
+  try{ await api({action:"delete", password:PASS, slug}); cargarLista(); }
+  catch(e){ alert("Error: "+e.message); }
+}
+
+// ---------- helpers ----------
+function msg(which, text, kind){
+  const m = $(which+"Msg"); m.textContent=text; m.className="msg "+kind+" show";
+}
+function escHtml(s){return String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function escAttr(s){return String(s==null?"":s).replace(/["&<>]/g,c=>({'"':"&quot;","&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+</script>
+</body>
+</html>

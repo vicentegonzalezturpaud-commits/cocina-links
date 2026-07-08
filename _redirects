@@ -1,1 +1,9 @@
-/*    /index.html   200
+# Rutas limpias del panel y el perfil
+/admin      /admin.html     200
+/admin/     /admin.html     200
+/perfil     /perfil.html    200
+/perfil/    /perfil.html    200
+
+# Los links cortos /r/:slug los maneja la Edge Function (netlify/edge-functions/redirect.js)
+# El resto cae al generador (compatibilidad con links viejos tipo /nombre/VIDEOID)
+/*          /index.html     200

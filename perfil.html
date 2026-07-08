@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paula – Cocina en Fácil y Sin Culpas</title>
+
+<!-- ===== Open Graph (vista previa al compartir el perfil) ===== -->
+<meta property="og:type" content="profile">
+<meta property="og:site_name" content="Cocina en Fácil y Sin Culpas">
+<meta property="og:title" content="Paula – Cocina en Fácil y Sin Culpas">
+<meta property="og:description" content="Recetas antiinflamatorias fáciles y sin culpas. Aquí están todos mis links: recetas, redes y más.">
+<meta property="og:image" content="/paula.jpg">
+<meta property="og:url" content="/perfil">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Paula – Cocina en Fácil y Sin Culpas">
+<meta name="twitter:description" content="Recetas antiinflamatorias fáciles y sin culpas.">
+<meta name="twitter:image" content="/paula.jpg">
+
+<style>
+  :root{--verde:#3f7d52;--verde-osc:#2f5e3e;--terra:#d98b5f;--crema:#fbf6ee;
+    --tinta:#2c2a26;--gris:#7a756c;--linea:#e7ddcf}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#fbf6ee 0%,#f3ece0 100%);color:var(--tinta);line-height:1.5;min-height:100vh}
+  .wrap{max-width:460px;margin:0 auto;padding:36px 20px 60px}
+  .avatar{width:112px;height:112px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 14px;
+    border:4px solid #fff;box-shadow:0 4px 16px rgba(60,50,30,.12);background:#e7ddcf}
+  .avatar.emoji{display:flex;align-items:center;justify-content:center;font-size:52px;line-height:1}
+  h1{text-align:center;font-size:22px;margin:0 0 4px;color:var(--verde-osc)}
+  .tag{text-align:center;color:var(--terra);font-weight:700;font-size:13.5px;margin:0 0 10px;
+    text-transform:uppercase;letter-spacing:.03em}
+  .bio{text-align:center;color:#4a463f;font-size:14.5px;margin:0 auto 26px;max-width:360px}
+  .links{display:flex;flex-direction:column;gap:12px}
+  a.link{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--linea);
+    border-radius:14px;padding:14px 16px;text-decoration:none;color:var(--tinta);font-weight:600;
+    box-shadow:0 2px 8px rgba(60,50,30,.05);transition:.15s}
+  a.link:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(60,50,30,.1);border-color:var(--verde)}
+  a.link .emoji{font-size:22px;width:30px;text-align:center;flex-shrink:0}
+  a.link .thumb{width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0;background:#eee}
+  a.link .txt{flex:1;min-width:0}
+  a.link .txt .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14.5px}
+  a.link .arrow{color:var(--gris);flex-shrink:0}
+  .empty{text-align:center;color:var(--gris);font-size:14px;background:#fff;border:1px dashed var(--linea);
+    border-radius:14px;padding:22px}
+  .foot{text-align:center;margin-top:32px;font-size:12px;color:var(--gris)}
+  .foot a{color:var(--verde-osc);text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- Si subes una foto llamada paula.jpg a la carpeta, se usa. Si no, muestra el emoji. -->
+  <img class="avatar" id="avatar" src="/paula.jpg" alt="Paula"
+       onerror="this.style.display='none'; document.getElementById('avatarFallback').style.display='flex';">
+  <div class="avatar emoji" id="avatarFallback" style="display:none">🥑</div>
+
+  <h1>Paula</h1>
+  <div class="tag">Cocina en Fácil y Sin Culpas</div>
+  <p class="bio">Recetas antiinflamatorias fáciles, ricas y sin culpas 🌿 Aquí encuentras mis recetas, redes y contenidos favoritos.</p>
+
+  <div class="links" id="links">
+    <div class="empty">Cargando mis links…</div>
+  </div>
+
+  <p class="foot">Hecho con 💚 · <a href="/">Cocina en Fácil y Sin Culpas</a></p>
+</div>
+
+<script>
+const API = "/.netlify/functions/links";
+function escHtml(s){return String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function escAttr(s){return String(s==null?"":s).replace(/["&<>]/g,c=>({'"':"&quot;","&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+
+(async function(){
+  const cont = document.getElementById("links");
+  try{
+    const r = await fetch(API,{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({action:"public"})});
+    const d = await r.json();
+    if(!d.links || !d.links.length){
+      cont.innerHTML = '<div class="empty">Muy pronto encontrarás aquí mis links 🌿</div>';
+      return;
+    }
+    cont.innerHTML = "";
+    d.links.forEach(l=>{
+      const a = document.createElement("a");
+      a.className = "link";
+      a.href = "/r/" + encodeURIComponent(l.slug);
+      const media = l.image
+        ? '<img class="thumb" src="'+escAttr(l.image)+'" alt="">'
+        : '<span class="emoji">'+escHtml(l.emoji||"🔗")+'</span>';
+      a.innerHTML = media +
+        '<span class="txt"><span class="t">'+escHtml(l.title||l.slug)+'</span></span>'+
+        '<span class="arrow">›</span>';
+      cont.appendChild(a);
+    });
+  }catch(e){
+    cont.innerHTML = '<div class="empty">No pudimos cargar los links ahora. Intenta de nuevo.</div>';
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+[build]
+  # La carpeta que se publica es esta misma
+  publish = "."
+
+[functions]
+  # Aquí viven las funciones de administración (Node)
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# La Edge Function de links cortos se configura sola dentro de
+# netlify/edge-functions/redirect.js (con "export const config").
